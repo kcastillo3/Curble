@@ -4,9 +4,9 @@ from config import db
 from sqlalchemy_serializer import SerializerMixin
 import datetime
 
-# Models go here!
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
+    serialize_rules = ('-items', '-favorites', '-feedback_given')  # Prevent serializing back references
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(255), nullable=False, unique=True)
@@ -21,6 +21,7 @@ class User(db.Model, SerializerMixin):
 
 class Item(db.Model, SerializerMixin):
     __tablename__ = 'items'
+    serialize_rules = ('-user.items', '-user.favorites', '-user.feedback_given', '-favorited_by', '-feedback')  # Adjust as needed
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -29,7 +30,7 @@ class Item(db.Model, SerializerMixin):
     location = Column(String(255), nullable=False)
     condition = Column(String(100), nullable=False)
     time_to_be_set_on_curb = Column(DateTime)
-    image_url = Column(String(255))
+    image = Column(String(255))
     user = relationship('User', back_populates='items')
     favorited_by = relationship('Favorites', back_populates='item')
     feedback = relationship('UserFeedback', back_populates='item')
@@ -39,6 +40,7 @@ class Item(db.Model, SerializerMixin):
 
 class Favorites(db.Model, SerializerMixin):
     __tablename__ = 'favorites'
+    serialize_rules = ('-user', '-item')  # Simplifying to avoid back-ref recursion
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -52,6 +54,7 @@ class Favorites(db.Model, SerializerMixin):
 
 class UserFeedback(db.Model, SerializerMixin):
     __tablename__ = 'user_feedback'
+    serialize_rules = ('-user', '-item')  # Simplifying to avoid back-ref recursion
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
