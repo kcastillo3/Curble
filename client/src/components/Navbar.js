@@ -1,32 +1,28 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import '../index.css';
+import { useAuth } from './AuthContext'; // Import useAuth hook from where AuthContext is defined
 
-const Navbar = ({ isLoggedIn, onLogout }) => {
+const Navbar = () => {
+  const { isLoggedIn } = useAuth(); // Access isLoggedIn from AuthContext
+
   return (
-    <header className='header'>
-      <nav className="navbar">
-        <ul>
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/browse">Browse</Link></li>
-          {isLoggedIn ? (
-            <>
-              {/* When logged in, show link to Account and Logout option */}
-              <li><Link to="/account">Account</Link></li>
-              <li><button onClick={onLogout} style={{background: 'none', border: 'none', color: 'inherit', padding: 0, font: 'inherit', cursor: 'pointer', outline: 'inherit'}}>Logout</button></li>
-            </>
-          ) : (
-            // When not logged in, show Login and Sign Up options
-            <>
-              <li><Link to="/login">Login</Link></li>
-              <li><Link to="/register">Register</Link></li>
-            </>
-          )}
-        </ul>
-      </nav>
-    </header>
-  )
-}
+    <nav className="navbar">
+      <ul>
+        <li><NavLink to="/" exact activeClassName="active">Home</NavLink></li>
+        <li><NavLink to="/about" activeClassName="active">About</NavLink></li>
+        <li><NavLink to="/browse" activeClassName="active">Browse</NavLink></li>
+        {isLoggedIn ? (
+          <li><NavLink to="/account" activeClassName="active">Account</NavLink></li>
+        ) : (
+          <>
+            <li><NavLink to="/login" activeClassName="active">Login</NavLink></li>
+            <li><NavLink to="/register" activeClassName="active">Register</NavLink></li>
+          </>
+        )}
+      </ul>
+    </nav>
+  );
+};
 
 export default Navbar;

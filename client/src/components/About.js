@@ -8,9 +8,9 @@ const About = () => {
     <div className="about-container">
       <section className="story-section">
         <h2>Our Story</h2>
-        <img src={couchImage} alt="Comfortable Couch" />
         <p>Born from the simple idea that one person's discard could be another's treasure, 'Curble' was created to facilitate these exchanges with ease and safety. What started as a small initiative has grown into a vibrant community of sharers in NYC, environmental advocates, and individuals passionate about making a difference, one curb at a time.</p>
-      </section>
+        <img src={couchImage} alt="Comfortable Couch" />
+        </section>
       
       <section className="mission-section">
         <h2>Our Mission</h2>

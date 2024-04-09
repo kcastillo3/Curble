@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import homeImage from '../assets/Curble Home.webp'; // Adjust the path based on your project structure
+import homeImage from '../assets/Curble Home.webp'; 
 
 const Home = () => {
   let history = useHistory(); // Hook to enable navigation

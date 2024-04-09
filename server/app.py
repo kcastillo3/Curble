@@ -22,11 +22,16 @@ def register():
     data = request.json
     if User.query.filter_by(email=data['email']).first():
         return jsonify({"message": "Email already registered"}), 400
+    
     new_user = User(email=data['email'], username=data['username'],
                     password_hash=generate_password_hash(data['password']))
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({"message": "Registration successful", "user_id": new_user.id}), 201
+
+    # Create an access token for the new user
+    access_token = create_access_token(identity=new_user.id)
+    
+    return jsonify({"message": "Registration successful", "user_id": new_user.id, "access_token": access_token}), 201
 
 @app.route('/login', methods=['POST'])
 def login():

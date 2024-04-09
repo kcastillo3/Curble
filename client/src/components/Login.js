@@ -2,12 +2,12 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useHistory, Link } from 'react-router-dom';
 import * as Yup from 'yup';
-import axios from 'axios';
+import { useAuth } from './AuthContext'; // Adjust the import path as necessary
 
 const Login = () => {
   const history = useHistory();
+  const { login } = useAuth(); // Destructure the login function from useAuth
 
-  // Yup validation schema
   const validationSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email address').required('Required'),
     password: Yup.string().required('Required'),
@@ -18,23 +18,17 @@ const Login = () => {
     password: '',
   };
 
-  const handleLogin = (values, { setSubmitting }) => {
-    axios.post('/login', values)
-      .then(response => {
-        // Assuming response.data contains a 'userId' when login is successful
-        console.log('Login successful:', response.data);
-        // Perform any state updates or localStorage/sessionStorage handling here
-        // Then redirect the user to the successful message page
-        history.push('/successful-message');
-      })
-      .catch(error => {
-        // Handle errors such as incorrect credentials
-        console.error('Login error:', error);
-        alert('Login failed. Please check your credentials.');
-      })
-      .finally(() => {
-        setSubmitting(false);
-      });
+  const handleLogin = async (values, { setSubmitting }) => {
+    try {
+      await login(values);
+      // Redirect to the Account page or a successful message page upon successful login
+      history.push('/successful-message'); // Adjust as necessary
+    } catch (error) {
+      console.error('Login error:', error.response?.data.message || error.message);
+      alert('Login failed. Please check your credentials.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
