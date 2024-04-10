@@ -69,7 +69,7 @@ def items():
             condition=data['condition'],
             user_id=get_jwt_identity(),
             time_to_be_set_on_curb=time_to_be_set_on_curb,
-            image=file_path
+            image=filename  # Only store the filename here
         )
         db.session.add(new_item)
         db.session.commit()
@@ -109,33 +109,6 @@ def get_user_profile(user_id):
         "username": user.username
     }), 200
 
-# @app.route('/users/<int:user_id>', methods=['PUT'])
-# @jwt_required()
-# def update_user_profile(user_id):
-#     user = User.query.get_or_404(user_id)
-#     current_user_id = get_jwt_identity()
-#     if user_id != current_user_id:
-#         return jsonify({"message": "Unauthorized"}), 403
-#     data = request.json
-#     user.email = data.get('email', user.email)
-#     user.username = data.get('username', user.username)
-#     # Update password if provided
-#     if data.get('password'):
-#         user.password_hash = generate_password_hash(data['password'])
-#     db.session.commit()
-#     return jsonify({"message": "User profile updated successfully"}), 200
-
-# @app.route('/users/<int:user_id>', methods=['DELETE'])
-# @jwt_required()
-# def delete_user_account(user_id):
-#     user = User.query.get_or_404(user_id)
-#     current_user_id = get_jwt_identity()
-#     if user_id != current_user_id:
-#         return jsonify({"message": "Unauthorized"}), 403
-#     db.session.delete(user)
-#     db.session.commit()
-#     return jsonify({"message": "User account deleted successfully"}), 200
-
 @app.route('/items/<int:item_id>', methods=['GET'])
 @jwt_required(optional=True)
 def get_item(item_id):
@@ -148,22 +121,30 @@ def update_item(item_id):
     item = Item.query.get_or_404(item_id)
     if item.user_id != get_jwt_identity():
         return jsonify({"message": "Unauthorized"}), 403
+
     data = request.form
-    if 'file' in request.files:
-        file = request.files['file']
+    if 'image' in request.files:  # Adjusted to 'image' to match the POST route
+        file = request.files['image']
         filename = secure_filename(file.filename)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
-        item.image_url = file_path
-    item.name = data.get('name', item.name)
-    item.description = data.get('description', item.description)
-    item.location = data.get('location', item.location)
-    item.condition = data.get('condition', item.condition)
-    try:
-        if data.get('time_to_be_set_on_curb'):
-            item.time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M:%S')
-    except ValueError:
-        return jsonify({"message": "Invalid date format. Please use YYYY-MM-DDTHH:MM:SS."}), 400
+        item.image = filename  # Only store the filename
+
+    # Check and update each field only if it has been provided in the form data
+    if 'name' in data:
+        item.name = data['name']
+    if 'description' in data:
+        item.description = data['description']
+    if 'location' in data:
+        item.location = data['location']
+    if 'condition' in data:
+        item.condition = data['condition']
+    if 'time_to_be_set_on_curb' in data:
+        try:
+            item.time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M')
+        except ValueError:
+            return jsonify({"message": "Invalid date format. Please use YYYY-MM-DDTHH:MM."}), 400
+
     db.session.commit()
     updated_item = Item.query.get(item_id)
     return jsonify({"message": "Item updated successfully", "item": updated_item.to_dict()}), 200
@@ -269,9 +250,11 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS   
 
 @app.route('/uploads/<filename>')
-@jwt_required()
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    try:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    except FileNotFoundError:
+        abort(404, description="Resource not found")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

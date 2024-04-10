@@ -11,11 +11,17 @@ const MyPostedItems = ({ userId }) => {
   const [imagePreview, setImagePreview] = useState('');
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: 'image/*',
+    accept: {
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+    },
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
-      setEditingItem(prev => ({ ...prev, image: file }));
-      setImagePreview(URL.createObjectURL(file));
+      if (file) {
+        setEditingItem(prev => ({ ...prev, image: file }));
+        setImagePreview(URL.createObjectURL(file));
+      }
     },
   });
 
@@ -58,11 +64,12 @@ const MyPostedItems = ({ userId }) => {
     e.preventDefault();
     const formData = new FormData();
     Object.keys(editingItem).forEach(key => {
-      if (key === 'image' && editingItem[key] instanceof File) {
-        formData.append('image', editingItem.image);
-      } else {
-        formData.append(key, editingItem[key]);
-      }
+        // Make sure the key for the image is consistent with the backend
+        if (key === 'image' && editingItem[key] instanceof File) {
+            formData.append('image', editingItem.image); // Use 'image' instead of 'file'
+        } else {
+            formData.append(key, editingItem[key]);
+        }
     });
 
     try {
