@@ -25,12 +25,19 @@ const Register = () => {
 
   const onSubmit = async (values, { setSubmitting }) => {
     try {
-      // Adjust the endpoint as necessary to match my API
       const response = await axios.post('/register', values);
-      // Ensure my API response matches this structure or adjust accordingly
       if (response.data.access_token) {
+        // Assuming my API also returns the access_token on registration
+        // And I want to manually set it in the localStorage before login (optional)
+        // localStorage.setItem('access_token', response.data.access_token);
+  
         // Login the user with the credentials
         await login({ email: values.email, password: values.password });
+        
+        // Now, access and log the JWT token stored in localStorage
+        const token = localStorage.getItem('access_token');
+        console.log('JWT Token after registration:', token); // Log the token to the console
+        
         // Navigate to the success message page
         history.push('/successful-message');
       }

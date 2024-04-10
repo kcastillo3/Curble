@@ -118,6 +118,7 @@ body {
   color: white; /* Text color for the button */
   background-color: #94EBCB; /* Mint green background color for the button */
   padding: 15px 30px; /* Adjust padding to match the design */
+  font-weight: bold;
   border: none;
   border-radius: 30px; /* Rounded corners for the button */
   cursor: pointer;
@@ -231,6 +232,10 @@ body {
   text-decoration: none; /* Removes underline from the link */
 }
 
+.login-container p a:hover {
+  text-decoration: underline; /* Adds underline to the link on hover */
+}
+
 .login-container .login-form {
   display: flex;
   flex-direction: column; /* Stacks form fields vertically */
@@ -260,15 +265,18 @@ body {
 }
 
 .submit-button {
-  background-color: #94EBCB; /* Mint green background color */
-  color: white; /* White text color */
-  padding: 10px 20px; /* Padding inside the button */
-  font-size: 16px; /* Font size for the text inside the button */
-  border-radius: 5px; /* Rounded corners for the button */
-  cursor: pointer; /* Cursor indicates a link */
-  margin-top: 1em; /* Margin above the button */
-  transition: all 0.2s ease; /* Smooth transition for interactive states */
-  text-shadow: 2px 2px 2px black; /* Shadow to make the text pop */
+  font-size: 20px; /* Adjust the font-size as per the design */
+  color: white; /* Text color for the button */
+  background-color: #94EBCB; /* Mint green background color for the button */
+  padding: 15px 30px; /* Adjust padding to match the design */
+  font-weight: bold;
+  border: none;
+  border-radius: 30px; /* Rounded corners for the button */
+  cursor: pointer;
+  display: block;
+  width: fit-content;
+  margin: 30px auto; /* Centers the button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
 .submit-button:hover {
@@ -329,20 +337,34 @@ body {
 }
 
 .register-button {
-  background-color: #94EBCB; /* Mint green background color */
-  color: white; /* White text color */
-  padding: 10px 20px; /* Padding inside the button */
-  font-size: 16px; /* Font size for the text inside the button */
-  border-radius: 5px; /* Rounded corners for the button */
-  cursor: pointer; /* Cursor indicates a link */
-  margin-top: 1em; /* Margin above the button */
-  transition: all 0.2s ease; /* Smooth transition for interactive states */
-  text-shadow: 2px 2px 2px black; /* Shadow to make the text pop */
+  font-size: 20px; /* Adjust the font-size as per the design */
+  color: white; /* Text color for the button */
+  background-color: #94EBCB; /* Mint green background color for the button */
+  padding: 15px 30px; /* Adjust padding to match the design */
+  font-weight: bold;
+  border: none;
+  border-radius: 30px; /* Rounded corners for the button */
+  cursor: pointer;
+  display: block;
+  width: fit-content;
+  margin: 30px auto; /* Centers the button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
 .register-button:hover {
   background-color: #82d3b8; /* A shade darker on hover */
   text-shadow: 3px 3px 3px black; /* Slightly more pronounced text shadow on hover */
+}
+
+.register-container p a {
+  color: #6EAC8B;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out; /* Smooth transition for color */
+}
+
+.register-container p a:hover {
+  color: #5a9479; /* Darker shade of green for hover */
+  text-decoration: underline; /* Underline on hover for more emphasis */
 }
 
 /* Successful Message */
@@ -383,6 +405,7 @@ body {
   color: white; /* White text color */
   padding: 12px 24px; /* Padding inside the button */
   font-size: 16px; /* Font size */
+  font-weight: bold;
   border: none; /* No border */
   border-radius: 25px; /* Rounded borders */
   cursor: pointer; /* Cursor indicates a link */
@@ -524,14 +547,18 @@ body {
 }
 
 .logout-button {
-  background-color: #94EBCB; /* Background color matching the theme */
-  color: white; /* Text color */
-  border: none; /* No border */
-  border-radius: 5px; /* Rounded corners */
-  padding: 10px 20px; /* Padding for the button */
-  cursor: pointer; /* Indicates the element is clickable */
-  font-size: 1rem; /* Font size */
-  transition: background-color 0.2s ease; /* Smooth transition for hover effect */
+  background-color: #94EBCB;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .logout-button:hover {
@@ -576,6 +603,7 @@ you can specifically target the logout button container like so: */
   padding: 10px 20px;
   margin-top: auto; /* Pushes the logout button to the bottom */
   background-color: #94EBCB; /* Use your app's color theme */
+  font-weight: bold;
   color: white;
   border: none;
   border-radius: 5px;
@@ -643,13 +671,17 @@ you can specifically target the logout button container like so: */
 .upload-button,
 .form-button {
   background-color: #94EBCB;
-  border: none;
-  border-radius: 5px;
   color: white;
+  font-weight: bold;
+  border: none;
   padding: 10px 20px;
+  margin: 5px;
+  border-radius: 20px;
   cursor: pointer;
-  display: inline-block;
-  margin-right: 10px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .upload-button:hover,
@@ -675,7 +707,207 @@ you can specifically target the logout button container like so: */
   margin-bottom: 10px;
 }
 
+.image-preview {
+  width: 80%; /* Adjust if you want a smaller preview */
+  height: auto;
+  max-height: 200px; /* Limit the height to avoid large previews */
+  object-fit: cover;
+  border: 2px solid #ccc; /* Optional: if you want a border around the image */
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
 .file-name {
   margin-top: 10px;
 }
 
+/* Update Form */
+.edit-item-form {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.edit-item-form .form-group {
+  margin-bottom: 15px;
+}
+
+.edit-item-form .form-group label {
+  margin-bottom: 5px;
+  display: block;
+  font-weight: bold;
+}
+
+.edit-item-form .form-group input,
+.edit-item-form .form-group select,
+.edit-item-form .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.edit-item-form .form-group textarea {
+  height: 120px; /* Adjust the height of the textarea */
+}
+
+.edit-item-form .dropzone {
+  border: 2px dashed #94EBCB;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.edit-item-form .image-preview {
+  width: 100px; /* Fixed width for the preview */
+  height: 100px; /* Fixed height for the preview */
+  border-radius: 5px;
+  margin-top: 10px;
+  display: block; /* Ensure it's a block element */
+  object-fit: cover;
+}
+
+/* Change this*/
+.edit-item-form button,
+.edit-item-form .btn-primary,
+.edit-item-form .btn-secondary {
+  background-color: #94EBCB;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-left: 1in;
+}
+
+.edit-item-form .btn-primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.edit-item-form .btn-primary:hover,
+.edit-item-form .btn-primary:focus {
+  background-color: #45a049;
+  outline: none;
+}
+
+.edit-item-form .btn-secondary {
+  background-color: #f44336;
+  color: white;
+}
+
+.edit-item-form .btn-secondary:hover,
+.edit-item-form .btn-secondary:focus {
+  background-color: #d32f2f;
+  outline: none;
+}
+
+.edit-item-form .form-group input[type="text"].name-input,
+.edit-item-form .form-group select,
+.edit-item-form .form-group textarea {
+  border: 2px solid #ccc;
+  transition: border-color 0.3s;
+}
+
+.edit-item-form .form-group input[type="text"].name-input:focus,
+.edit-item-form .form-group select:focus,
+.edit-item-form .form-group textarea:focus {
+  border-color: #82d3b8;
+  outline: none;
+}
+
+.edit-item-form .form-group label.name-label {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.edit-item-form .dropzone button {
+  background-color: #94EBCB;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-left: center;
+}
+
+.edit-item-form .dropzone button:hover {
+  background-color: #82d3b8;
+}
+
+.edit-item-form .image-preview img {
+  margin-top: 10px;
+  border-radius: 5px;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 5px;
+  border: 2px dashed #94EBCB;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/* Additional styles for the upload button */
+.upload-image-button {
+  background-color: #94EBCB;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px; /* Space between button and preview image */
+}
+
+.upload-image-button:hover {
+  background-color: #82d3b8;
+}
+
+/* Container for the image preview to ensure it's centered */
+.image-preview-container {
+  text-align: center; /* Centers inline or inline-block elements */
+  width: 100%; /* Ensures the container takes full width */
+}
+
+.image-preview {
+  max-width: 100px; /* Set a max-width to control the preview size */
+  max-height: 100px; /* Set a max-height to control the preview size */
+  border-radius: 5px;
+  margin-top: 10px; /* Space above the preview image */
+}
+
+/* Center the image within the .image-preview-container */
+.image-preview-container img {
+  width: 100%; /* Full width of the container */
+  height: auto; /* Maintain aspect ratio */
+  max-width: 100px; /* Limit to actual image size */
+  max-height: 100px; /* Limit to actual image size */
+  margin: 0 auto; /* Center the image */
+}

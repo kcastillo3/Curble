@@ -30,7 +30,7 @@ const ItemCard = ({
         />
         <p>{item.description}</p>
         {/* Conditional rendering based on permissions and functionalities */}
-        {canEdit && <button onClick={() => onEdit(item.id)}>Edit</button>}
+        {canEdit && <button onClick={() => onEdit(item)}>Update</button>}        
         {canDelete && <button onClick={() => onDelete(item.id)}>Delete</button>}
         {typeof isFavorited !== 'undefined' && (
           <button onClick={() => onToggleFavorite(item.id)}>

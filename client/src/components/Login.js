@@ -21,7 +21,9 @@ const Login = () => {
   const handleLogin = async (values, { setSubmitting }) => {
     try {
       await login(values);
-      // Redirect to the Account page or a successful message page upon successful login
+      // Since login() updates localStorage, retrieve the token from there
+      const token = localStorage.getItem('access_token');
+      console.log('JWT Token:', token); // Log the token to the console
       history.push('/successful-message'); // Adjust as necessary
     } catch (error) {
       console.error('Login error:', error.response?.data.message || error.message);

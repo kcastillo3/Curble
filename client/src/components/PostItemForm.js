@@ -7,24 +7,24 @@ import { useDropzone } from 'react-dropzone';
 const PostItemForm = ({ onItemPostSuccess }) => {
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState(''); // State to hold the preview URL
 
-  // Dropzone setup with explicit button trigger
   const DropzoneComponent = ({ setFieldValue }) => {
     const { getRootProps, getInputProps, open } = useDropzone({
-      // Specifying acceptable MIME types directly
       accept: {
         'image/jpeg': ['.jpeg', '.jpg'],
         'image/png': ['.png'],
         'image/gif': ['.gif'],
       },
-      noClick: true, // Preventing file dialog opening on click
+      noClick: true,
       onDrop: acceptedFiles => {
-        // Handle file(s) dropped
-        const file = acceptedFiles[0]; // Assuming single file upload
+        const file = acceptedFiles[0];
         if (file) {
-          setFieldValue("image", file); // Set the file as the value for the 'image' field
+          setFieldValue('image', file);
+          const filePreview = URL.createObjectURL(file);
+          setPreviewSrc(filePreview); // Update the preview URL
         }
-      }
+      },
     });
 
     return (
@@ -33,6 +33,11 @@ const PostItemForm = ({ onItemPostSuccess }) => {
         <button type="button" onClick={open} className="upload-button">
           Upload Image
         </button>
+        {previewSrc && (
+          <div className="image-preview-wrapper">
+            <img src={previewSrc} alt="Preview" className="image-preview" />
+          </div>
+        )}
       </div>
     );
   };
@@ -45,42 +50,51 @@ const PostItemForm = ({ onItemPostSuccess }) => {
         initialValues={{
           name: '',
           description: '',
-          location: '',
+          borough: '', // Change this to 'borough'
+          address: '', // New field for address
           condition: '',
           image: null,
+          time_to_be_set_on_curb: '',
         }}
         validationSchema={Yup.object({
           name: Yup.string().required('Required'),
           description: Yup.string().required('Required'),
-          location: Yup.string().required('Required'),
+          borough: Yup.string().required('Required'), // Dropdown for NYC Boroughs
+          address: Yup.string().required('Required'), // Text input for specific address
           condition: Yup.string().required('Required'),
           image: Yup.mixed().required('An image is required'),
+          time_to_be_set_on_curb: Yup.date().required('Setting a curb time is required'),
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           const formData = new FormData();
-          for (const key in values) {
-            formData.append(key, values[key]);
-          }
+          formData.append('name', values.name);
+          formData.append('description', values.description);
+          // Combine 'borough' and 'address' into 'location'
+          formData.append('location', `${values.borough}, ${values.address}`);
+          formData.append('condition', values.condition);
+          formData.append('image', values.image);
+          formData.append('time_to_be_set_on_curb', values.time_to_be_set_on_curb);
 
           axios.post('/items', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
             },
           })
-          .then(response => {
-            if (onItemPostSuccess) {
-              onItemPostSuccess(response.data);
-            }
-            setSubmitSuccess(true);
-            setTimeout(() => setSubmitSuccess(false), 5000);
-            resetForm();
-          })
-          .catch(error => {
-            setSubmitError(error.response ? error.response.data.message : 'Error posting item');
-          })
-          .finally(() => {
-            setSubmitting(false);
-          });
+            .then(response => {
+              if (onItemPostSuccess) {
+                onItemPostSuccess(response.data);
+              }
+              setSubmitSuccess(true);
+              setTimeout(() => setSubmitSuccess(false), 5000);
+              resetForm();
+            })
+            .catch(error => {
+              setSubmitError(error.response ? error.response.data.message : 'Error posting item');
+            })
+            .finally(() => {
+              setSubmitting(false);
+            });
         }}
       >
         {({ isSubmitting, setFieldValue, values }) => (
@@ -91,8 +105,20 @@ const PostItemForm = ({ onItemPostSuccess }) => {
             <Field as="textarea" name="description" placeholder="Description" className="form-textarea" />
             <ErrorMessage name="description" component="div" className="error-message" />
 
-            <Field name="location" type="text" placeholder="Location" className="form-field" />
-            <ErrorMessage name="location" component="div" className="error-message" />
+            {/* Dropdown for Boroughs */}
+            <Field as="select" name="borough" placeholder="Borough" className="form-select">
+              <option value="">Select Borough</option>
+              <option value="Manhattan">Manhattan</option>
+              <option value="Brooklyn">Brooklyn</option>
+              <option value="Queens">Queens</option>
+              <option value="Bronx">Bronx</option>
+              <option value="Staten Island">Staten Island</option>
+            </Field>
+            <ErrorMessage name="borough" component="div" className="error-message" />
+
+            {/* Input for Address */}
+            <Field name="address" type="text" placeholder="Address" className="form-field" />
+            <ErrorMessage name="address" component="div" className="error-message" />
 
             <Field as="select" name="condition" className="form-select">
               <option value="">Select Condition</option>
@@ -104,10 +130,11 @@ const PostItemForm = ({ onItemPostSuccess }) => {
             </Field>
             <ErrorMessage name="condition" component="div" className="error-message" />
 
+            <Field name="time_to_be_set_on_curb" type="datetime-local" placeholder="Time to Be Set on Curb" className="form-field" />
+            <ErrorMessage name="time_to_be_set_on_curb" component="div" className="error-message" />
+
             <DropzoneComponent setFieldValue={setFieldValue} />
-            {values.image && (
-              <p className="file-name">Selected file: {values.image.name}</p>
-            )}
+            {values.image && <p className="file-name">Selected file: {values.image.name}</p>}
             <ErrorMessage name="image" component="div" className="error-message" />
 
             <button type="submit" disabled={isSubmitting} className="form-button">Submit</button>

@@ -53,22 +53,30 @@ def items():
         file = request.files['image']
         if file.filename == '':
             return jsonify({"message": "No selected file"}), 400
+
         filename = secure_filename(file.filename)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
 
         data = request.form
-        new_item = Item(name=data['name'], description=data['description'],
-                        location=data['location'], condition=data['condition'],
-                        user_id=get_jwt_identity(),
-                        time_to_be_set_on_curb=datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M:%S'),
-                        image=file_path)  # Make sure this matches my database column for the image
+        # Adjust the strptime format to exclude seconds
+        time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M')
+
+        new_item = Item(
+            name=data['name'],
+            description=data['description'],
+            location=data['location'],
+            condition=data['condition'],
+            user_id=get_jwt_identity(),
+            time_to_be_set_on_curb=time_to_be_set_on_curb,
+            image=file_path
+        )
         db.session.add(new_item)
         db.session.commit()
         return jsonify({"message": "Item posted successfully", "item_id": new_item.id}), 201
     else:
         items = Item.query.all()
-        return jsonify([item.to_dict() for item in items]), 200  # Ensure my Item model has a to_dict method
+        return jsonify([item.to_dict() for item in items]), 200
 
 @app.route('/favorites', methods=['POST'])
 @jwt_required()
@@ -151,10 +159,14 @@ def update_item(item_id):
     item.description = data.get('description', item.description)
     item.location = data.get('location', item.location)
     item.condition = data.get('condition', item.condition)
-    if data.get('time_to_be_set_on_curb'):
-        item.time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M:%S')
+    try:
+        if data.get('time_to_be_set_on_curb'):
+            item.time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        return jsonify({"message": "Invalid date format. Please use YYYY-MM-DDTHH:MM:SS."}), 400
     db.session.commit()
-    return jsonify({"message": "Item updated successfully", "item_id": item.id}), 200
+    updated_item = Item.query.get(item_id)
+    return jsonify({"message": "Item updated successfully", "item": updated_item.to_dict()}), 200
 
 @app.route('/items/<int:item_id>', methods=['DELETE'])
 @jwt_required()
@@ -255,6 +267,11 @@ def upload_file():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS   
+
+@app.route('/uploads/<filename>')
+@jwt_required()
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)
