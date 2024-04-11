@@ -9,6 +9,7 @@ const MyPostedItems = ({ userId }) => {
   const [error, setError] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [isImageUpdated, setIsImageUpdated] = useState(false);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -21,6 +22,7 @@ const MyPostedItems = ({ userId }) => {
       if (file) {
         setEditingItem(prev => ({ ...prev, image: file }));
         setImagePreview(URL.createObjectURL(file));
+        setIsImageUpdated(true); // Mark image as updated
       }
     },
   });
@@ -62,38 +64,55 @@ const MyPostedItems = ({ userId }) => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    Object.keys(editingItem).forEach(key => {
-        // Make sure the key for the image is consistent with the backend
-        if (key === 'image' && editingItem[key] instanceof File) {
-            formData.append('image', editingItem.image); // Use 'image' instead of 'file'
-        } else {
-            formData.append(key, editingItem[key]);
-        }
-    });
-
+  
+    const token = localStorage.getItem('access_token');
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.put(`/items/${editingItem.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      let response;
+      if (isImageUpdated) {
+        // Handling full update (including image) with PUT
+        const formData = new FormData();
+        Object.keys(editingItem).forEach(key => {
+          if (key === 'image' && editingItem[key] instanceof File) {
+            formData.append('image', editingItem.image);
+          } else {
+            formData.append(key, editingItem[key]);
+          }
+        });
+  
+        response = await axios.put(`/items/${editingItem.id}`, formData, {
+          headers: { 'Authorization': `Bearer ${token}` }, // Content-Type for multipart/form-data is set automatically
+        });
+      } else {
+        // Handling partial update without image using PATCH
+        const dataToSend = { ...editingItem };
+        delete dataToSend.image; // Ensure image is not included in PATCH request
+        
+        response = await axios.patch(`/items/${editingItem.id}`, dataToSend, { headers });
+      }
+  
+      // Update UI based on response
       setItems(prevItems => prevItems.map(item => item.id === editingItem.id ? { ...item, ...response.data.item } : item));
-      setEditingItem(null);
-      setImagePreview('');
     } catch (err) {
       console.error('Error updating item:', err);
       setError('Failed to update item');
+    } finally {
+      // Reset states after update attempt
+      setEditingItem(null);
+      setImagePreview('');
+      setIsImageUpdated(false);
     }
   };
 
   const startEditing = (item) => {
     setEditingItem(item);
     setImagePreview(item.image || ''); // Use the existing image as a fallback
+    setIsImageUpdated(false); // Reset image updated state
   };
-
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -114,7 +133,8 @@ const MyPostedItems = ({ userId }) => {
               placeholder="Enter the item name"
             />
           </div>
-          {/* Description Input */}<div className="form-group">
+          {/* Description Input */}
+          <div className="form-group">
             <label htmlFor="description">Description:</label>
             <textarea
               name="description"
@@ -141,7 +161,7 @@ const MyPostedItems = ({ userId }) => {
               <option value="Staten Island">Staten Island</option>
             </select>
           </div>
-
+  
           {/* Address Input */}
           <div className="form-group">
             <label htmlFor="address">Address:</label>
@@ -154,7 +174,7 @@ const MyPostedItems = ({ userId }) => {
               className="form-control"
             />
           </div>
-
+  
           {/* Condition Dropdown */}
           <div className="form-group">
             <label htmlFor="condition">Condition:</label>
@@ -172,7 +192,7 @@ const MyPostedItems = ({ userId }) => {
               <option value="Poor">Poor</option>
             </select>
           </div>
-
+  
           {/* Time to Be Set on Curb */}
           <div className="form-group">
             <label htmlFor="time_to_be_set_on_curb">Time to Be Set on Curb:</label>
@@ -184,9 +204,8 @@ const MyPostedItems = ({ userId }) => {
               className="form-control"
             />
           </div>
-          {/* Include inputs for other fields */}
+          {/* Dropzone for image upload */}
           <div className="form-group">
-            {/* Dropzone for image upload */}
             <div {...getRootProps({ className: 'dropzone' })}>
               <input {...getInputProps()} />
               <button type="button" className="upload-image-button">Upload Image</button>

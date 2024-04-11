@@ -159,6 +159,32 @@ def delete_item(item_id):
     db.session.commit()
     return jsonify({"message": "Item deleted successfully"}), 200
 
+@app.route('/items/<int:item_id>', methods=['PATCH'])
+@jwt_required()
+def patch_item(item_id):
+    item = Item.query.get_or_404(item_id)
+    if item.user_id != get_jwt_identity():
+        return jsonify({"message": "Unauthorized"}), 403
+
+    data = request.get_json()
+
+    if 'name' in data:
+        item.name = data['name']
+    if 'description' in data:
+        item.description = data['description']
+    if 'location' in data:
+        item.location = data['location']
+    if 'condition' in data:
+        item.condition = data['condition']
+    if 'time_to_be_set_on_curb' in data:
+        try:
+            item.time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return jsonify({"message": "Invalid date format. Please use 'YYYY-MM-DD HH:MM:SS' format."}), 400
+
+    db.session.commit()
+    return jsonify({"message": "Item updated successfully", "item": item.to_dict()}), 200
+
 @app.route('/favorites', methods=['GET'])
 @jwt_required()
 def get_favorites():
