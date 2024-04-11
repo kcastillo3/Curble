@@ -1,8 +1,8 @@
 /* Header styles */
 .header {
-  background-color: #94EBCB; /* Mint green background color for the header */
-  padding: 10px 10px 10px 0; /* Reduced padding on the left for logo */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adds shadow for depth */
+  background-color: #94EBCB;
+  padding: 5px 10px; /* Reduced top and bottom padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .container {
@@ -16,6 +16,13 @@
 .logo {
   height: 100px; /* Increased size as per your request */
   margin-left: -100px; /* Adjust this to control the left spacing */
+  transition: transform 0.2s ease; /* Smooth transition for transform property */
+  cursor: pointer; /* Changes the cursor to a pointer to indicate it's clickable */
+  display: inline-block; /* Allows the transformation to take effect */
+}
+
+.logo:active {
+  transform: scale(0.95); /* Scales down the logo to 95% of its original size on click */
 }
 
 /* Navbar styles */
@@ -42,11 +49,14 @@
   font-size: 18px; /* Size of the navigation links */
   font-weight: bold; /* Bold text for the navigation links */
   position: relative; /* Position relative for pseudo-element positioning */
+  display: inline-block; /* Allows transformation */
+  transition: color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions for color, transform, and shadow */
 }
 
 .navbar a:hover,
 .navbar a.active {
   color: #000000; /* Black text color for hover and active states */
+  /* Consider adding a subtle box-shadow for hover if desired */
 }
 
 .navbar a:hover::after,
@@ -57,19 +67,12 @@
   bottom: -5px;
   height: 3px;
   width: 100%;
-  background-color: #000000; /* Black underline */
+  background-color: #000000; /* Black underline for active and hover states */
 }
 
-/* Start Here button styles with text shadow */
-.start-here-button {
-  /* ...other styles... */
-  color: #000000; /* Black text color */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
-}
-
-/* You can add hover effect for the button if you like */
-.start-here-button:hover {
-  /* styles for hover state */
+.navbar a:active {
+  transform: scale(0.95); /* Scales down the link to simulate a click */
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); /* Optional: Adds depth to the click effect */
 }
 
 /* Home */
@@ -114,18 +117,22 @@ body {
 }
 
 .start-here-button {
-  font-size: 20px; /* Adjust the font-size as per the design */
-  color: white; /* Text color for the button */
-  background-color: #94EBCB; /* Mint green background color for the button */
-  padding: 15px 30px; /* Adjust padding to match the design */
+  font-size: 20px;
+  color: white;
+  background-color: #94EBCB;
+  padding: 15px 30px;
   font-weight: bold;
   border: none;
-  border-radius: 30px; /* Rounded corners for the button */
+  border-radius: 30px;
   cursor: pointer;
   display: block;
   width: fit-content;
-  margin: 30px auto; /* Centers the button */
-  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  margin: 30px auto;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Add transform to the transition properties */
+}
+
+.start-here-button:active {
+  transform: scale(0.95); /* Apply the shrink effect on click */
 }
 
 .start-here-button:hover {
@@ -259,9 +266,9 @@ body {
   border-radius: 5px; /* Rounded corners of the input */
 }
 
-.error-message {
+.login-container .error-message {
   color: red; /* Color of the error message text */
-  margin-top: .25em; /* Space above the error message */
+  margin-top: .5em; /* Space above the error message */
 }
 
 .submit-button {
@@ -276,7 +283,11 @@ body {
   display: block;
   width: fit-content;
   margin: 30px auto; /* Centers the button */
-  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition for hover effect and transform */
+}
+
+.submit-button:active {
+  transform: scale(0.95); /* Scales down the button to 95% of its size when clicked */
 }
 
 .submit-button:hover {
@@ -337,18 +348,22 @@ body {
 }
 
 .register-button {
-  font-size: 20px; /* Adjust the font-size as per the design */
-  color: white; /* Text color for the button */
-  background-color: #94EBCB; /* Mint green background color for the button */
-  padding: 15px 30px; /* Adjust padding to match the design */
+  font-size: 20px;
+  color: white;
+  background-color: #94EBCB;
+  padding: 15px 30px;
   font-weight: bold;
   border: none;
-  border-radius: 30px; /* Rounded corners for the button */
+  border-radius: 30px;
   cursor: pointer;
   display: block;
   width: fit-content;
-  margin: 30px auto; /* Centers the button */
-  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  margin: 30px auto;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform to the transition */
+}
+
+.register-button:active {
+  transform: scale(0.95); /* Shrink effect when the button is clicked */
 }
 
 .register-button:hover {
@@ -510,24 +525,89 @@ body {
   box-shadow: none;
 }
 
+
+/* Modal backdrop */
 .modal {
-  position: fixed; /* Fixed position to cover the whole screen */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay to focus on the modal */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* High z-index to be on top of other content */
+  z-index: 1000; /* Ensures modal is on top of other content */
 }
 
+/* Modal content styling */
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  transition: transform 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns content to the start (left) */
+}
+
+/* Image in the modal */
 .modal-image {
-  max-width: 80%; /* Max width to not take up the entire screen width */
-  max-height: 80vh; /* Max height to not take up the entire screen height */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Shadow for a "lifted" effect */
-  border-radius: 8px; /* Optional: if you want rounded corners */
+  width: 300px; /* Fixed width for consistency */
+  height: 300px; /* Fixed height to match width, creating a square */
+  object-fit: cover; /* Ensures the image covers the area, cropping if necessary */
+  border-radius: 10px; /* Maintain rounded corners */
+  margin-bottom: 20px; /* Keeps space between the image and text content */
+  align-self: center; /* Centers the image */
+}
+
+/* Title in the modal */
+.modal-content h3 {
+  color: #30475e;
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+  width: 100%; /* Ensures the title can be centered in the container */
+  align-self: center; /* Centers the title */
+}
+
+/* Close button in the modal */
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #627d98;
+}
+
+/* Paragraph text in the modal */
+.modal-content p {
+  color: #627d98;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-weight: normal; /* Ensure normal font weight */
+  text-align: left;
+  width: 100%; /* Full width to align text properly */
+}
+
+/* Labels within the modal */
+.modal-content .modal-info-label {
+  font-weight: bold; /* Bolden the labels */
+  margin-right: 5px; /* Spacing between label and content */
+}
+
+/* Specific content in the modal */
+.modal-content .modal-info-content {
+  display: block; /* Separate line for content */
+  text-align: left;
 }
 
 /* Account Logout */

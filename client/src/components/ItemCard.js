@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 
-// Helper function to create the correct path for images
 const createImagePath = (imagePath) => {
-  // Check if imagePath is a URL or a local filename
   if (imagePath.startsWith('http') || imagePath.startsWith('/')) {
-    // It's a full URL or an absolute path, return as is
     return imagePath;
   } else {
-    // It's a local filename, construct the URL to access it via the backend
     return `http://localhost:5555/uploads/${imagePath}`;
   }
 };
@@ -27,12 +23,7 @@ const ItemCard = ({
   const favoriteButtonText = isFavorited ? 'Unfavorite' : 'Favorite';
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
-
-  // Make sure the image path is processed
   const imagePath = createImagePath(item.image);
-
-  console.log('Image Path:', item.image);
-  console.log('Constructed URL:', createImagePath(item.image));
 
   return (
     <>
@@ -40,18 +31,25 @@ const ItemCard = ({
         <h3>{item.name}</h3>
         <img src={imagePath} alt={item.name} className="item-image" onClick={toggleModal} />
         <p>{item.description}</p>
-        {canEdit && <button onClick={() => onEdit(item)}>Edit</button>}
-        {canDelete && <button onClick={() => onDelete(item.id)}>Delete</button>}
-        {typeof isFavorited !== 'undefined' && <button onClick={() => onToggleFavorite(item.id)}>{favoriteButtonText}</button>}
-        {onLike && <button onClick={() => onLike(item.id)}>Like</button>}
-        {onDislike && <button onClick={() => onDislike(item.id)}>Dislike</button>}
+        {canEdit && <button onClick={(e) => { e.stopPropagation(); onEdit(item); }}>Edit</button>}
+        {canDelete && <button onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}>Delete</button>}
+        {typeof isFavorited !== 'undefined' && <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(item.id); }}>{favoriteButtonText}</button>}
+        {onLike && <button onClick={(e) => { e.stopPropagation(); onLike(item.id); }}>Like</button>}
+        {onDislike && <button onClick={(e) => { e.stopPropagation(); onDislike(item.id); }}>Dislike</button>}
       </div>
 
       {isModalOpen && (
-        <div className="modal" onClick={() => setIsModalOpen(false)}>
-          <img src={imagePath} alt={item.name} className="modal-image" onClick={(e) => e.stopPropagation()} />
+      <div className="modal" onClick={() => setIsModalOpen(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <img src={imagePath} alt={item.name} className="modal-image" />
+          <h3 className="modal-title">{item.name}</h3>
+          <p className="modal-description">{item.description}</p>
+          <p><span className="modal-info-label">Location:</span> {item.location}</p>
+          <p><span className="modal-info-label">Condition:</span> {item.condition}</p>
+          <p><span className="modal-info-label">Curbside Pickup Time:</span> {new Date(item.time_to_be_set_on_curb).toLocaleString()}</p>
         </div>
-      )}
+      </div>
+    )}
     </>
   );
 };
