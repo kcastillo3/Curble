@@ -65,16 +65,15 @@ const PostItemForm = ({ onItemPostSuccess }) => {
           image: Yup.mixed().required('An image is required'),
           time_to_be_set_on_curb: Yup.date().required('Setting a curb time is required'),
         })}
-        onSubmit={(values, { setSubmitting, resetForm }) => {
+        onSubmit={(values, { setSubmitting, resetForm, setFieldValue }) => {
           const formData = new FormData();
           formData.append('name', values.name);
           formData.append('description', values.description);
-          // Combine 'borough' and 'address' into 'location'
           formData.append('location', `${values.borough}, ${values.address}`);
           formData.append('condition', values.condition);
           formData.append('image', values.image);
           formData.append('time_to_be_set_on_curb', values.time_to_be_set_on_curb);
-
+        
           axios.post('/items', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -87,7 +86,9 @@ const PostItemForm = ({ onItemPostSuccess }) => {
               }
               setSubmitSuccess(true);
               setTimeout(() => setSubmitSuccess(false), 5000);
-              resetForm();
+              resetForm();  // Reset all Formik fields
+              setPreviewSrc('');  // Clear image preview
+              setFieldValue('image', null);  // Explicitly clear the image field
             })
             .catch(error => {
               setSubmitError(error.response ? error.response.data.message : 'Error posting item');

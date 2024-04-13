@@ -44,10 +44,35 @@ const MyPostedItems = ({ userId }) => {
     fetchItems();
   }, [userId]);
 
+  const formatDateForBackend = (dateString) => {
+    const date = new Date(dateString);
+
+    const year = date.getFullYear();
+    let month = date.getMonth() + 1; // getMonth() returns month from 0-11
+    let day = date.getDate();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds(); // Get seconds component
+
+    // Ensuring two digits for month, day, hours, minutes, and seconds
+    month = month < 10 ? `0${month}` : month;
+    day = day < 10 ? `0${day}` : day;
+    hours = hours < 10 ? `0${hours}` : hours;
+    minutes = minutes < 10 ? `0${minutes}` : minutes;
+    seconds = seconds < 10 ? `0${seconds}` : seconds;
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // Use space and include seconds
+};
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditingItem(prev => ({ ...prev, [name]: value }));
-  };
+    if (name === 'time_to_be_set_on_curb') {
+        const formattedDate = formatDateForBackend(value);
+        setEditingItem(prev => ({ ...prev, [name]: formattedDate }));
+    } else {
+        setEditingItem(prev => ({ ...prev, [name]: value }));
+    }
+};
 
   const handleDelete = async (itemId) => {
     try {
@@ -92,7 +117,8 @@ const MyPostedItems = ({ userId }) => {
         const dataToSend = { ...editingItem };
         delete dataToSend.image; // Ensure image is not included in PATCH request
         
-        response = await axios.patch(`/items/${editingItem.id}`, dataToSend, { headers });
+        console.log("Sending PATCH data:", JSON.stringify(dataToSend));
+        response = await axios.patch(`/items/${editingItem.id}`, JSON.stringify(dataToSend), { headers });
       }
   
       // Update UI based on response

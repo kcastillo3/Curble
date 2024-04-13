@@ -31,33 +31,49 @@ const Browse = () => {
     fetchItemsAndFavorites();
   }, []);
 
-  const handleLike = async (itemId) => {
-    try {
-      await axios.post(`/feedback`, {
-        item_id: itemId,
-        feedback_type: 'LIKE',
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-      });
-      console.log('Liked item successfully');
-    } catch (error) {
-      console.error('Error liking item:', error);
-    }
-  };
+const handleLike = async (itemId) => {
+  try {
+    const updatedItems = items.map(item => {
+      if (item.id === itemId) {
+        return { ...item, likes: item.likes ? item.likes + 1 : 1 }; // assuming 'likes' key exists
+      }
+      return item;
+    });
+    setItems(updatedItems);
+    await axios.post(`/feedback`, {
+      item_id: itemId,
+      feedback_type: 'LIKE',
+    }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+    });
+    console.log('Liked item successfully');
+  } catch (error) {
+    console.error('Error liking item:', error);
+    // Optionally, revert back the optimistic update in case of failure
+  }
+};
 
-  const handleDislike = async (itemId) => {
-    try {
-      await axios.post(`/feedback`, {
-        item_id: itemId,
-        feedback_type: 'DISLIKE',
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-      });
-      console.log('Disliked item successfully');
-    } catch (error) {
-      console.error('Error disliking item:', error);
-    }
-  };
+const handleDislike = async (itemId) => {
+  try {
+    const updatedItems = items.map(item => {
+      if (item.id === itemId) {
+        return { ...item, dislikes: item.dislikes ? item.dislikes + 1 : 1 }; // assuming 'dislikes' key exists
+      }
+      return item;
+    });
+    setItems(updatedItems);
+    await axios.post(`/feedback`, {
+      item_id: itemId,
+      feedback_type: 'DISLIKE',
+    }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+    });
+    console.log('Disliked item successfully');
+  } catch (error) {
+    console.error('Error disliking item:', error);
+    // Optionally, revert back the optimistic update in case of failure
+  }
+};
 
   const handleToggleFavorite = async (itemId) => {
     const isFavorited = favoritedItems.includes(itemId);

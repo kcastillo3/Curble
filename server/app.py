@@ -6,6 +6,7 @@ from datetime import datetime
 import os
 from config import app, db, UPLOAD_FOLDER
 from models import User, Item, Favorites, UserFeedback
+from sqlalchemy.exc import SQLAlchemyError
 
 # Helper function for user authentication
 def authenticate_user(email, password):
@@ -46,10 +47,13 @@ def login():
 @jwt_required(optional=True)
 def items():
     if request.method == 'POST':
-        if not get_jwt_identity():
+        user_id = get_jwt_identity()
+        if not user_id:
             return jsonify({"message": "Unauthorized"}), 401
+
         if 'image' not in request.files:
             return jsonify({"message": "No file part"}), 400
+
         file = request.files['image']
         if file.filename == '':
             return jsonify({"message": "No selected file"}), 400
@@ -59,7 +63,6 @@ def items():
         file.save(file_path)
 
         data = request.form
-        # Adjust the strptime format to exclude seconds
         time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%dT%H:%M')
 
         new_item = Item(
@@ -67,16 +70,26 @@ def items():
             description=data['description'],
             location=data['location'],
             condition=data['condition'],
-            user_id=get_jwt_identity(),
+            user_id=user_id,
             time_to_be_set_on_curb=time_to_be_set_on_curb,
-            image=filename  # Only store the filename here
+            image=filename  # Store only the filename here
         )
         db.session.add(new_item)
         db.session.commit()
         return jsonify({"message": "Item posted successfully", "item_id": new_item.id}), 201
+
     else:
+        user_id = get_jwt_identity()
         items = Item.query.all()
-        return jsonify([item.to_dict() for item in items]), 200
+        items_data = []
+        for item in items:
+            item_dict = item.to_dict()
+            item_dict['likes'] = UserFeedback.query.filter_by(item_id=item.id, feedback_type='LIKE').count()
+            item_dict['dislikes'] = UserFeedback.query.filter_by(item_id=item.id, feedback_type='DISLIKE').count()
+            item_dict['user_liked'] = UserFeedback.query.filter_by(item_id=item.id, user_id=user_id, feedback_type='LIKE').first() is not None
+            item_dict['user_disliked'] = UserFeedback.query.filter_by(item_id=item.id, user_id=user_id, feedback_type='DISLIKE').first() is not None
+            items_data.append(item_dict)
+        return jsonify(items_data), 200
 
 @app.route('/favorites', methods=['POST'])
 @jwt_required()
@@ -112,8 +125,15 @@ def get_user_profile(user_id):
 @app.route('/items/<int:item_id>', methods=['GET'])
 @jwt_required(optional=True)
 def get_item(item_id):
+    user_id = get_jwt_identity()
     item = Item.query.get_or_404(item_id)
-    return jsonify(item.to_dict()), 200  # Ensure my Item model has a to_dict method
+    item_dict = item.to_dict()
+    # Add feedback counts and user feedback status
+    item_dict['likes'] = UserFeedback.query.filter_by(item_id=item.id, feedback_type='LIKE').count()
+    item_dict['dislikes'] = UserFeedback.query.filter_by(item_id=item.id, feedback_type='DISLIKE').count()
+    item_dict['user_liked'] = UserFeedback.query.filter_by(item_id=item.id, user_id=user_id, feedback_type='LIKE').first() is not None
+    item_dict['user_disliked'] = UserFeedback.query.filter_by(item_id=item.id, user_id=user_id, feedback_type='DISLIKE').first() is not None
+    return jsonify(item_dict), 200
 
 @app.route('/items/<int:item_id>', methods=['PUT'])
 @jwt_required()
@@ -155,9 +175,19 @@ def delete_item(item_id):
     item = Item.query.get_or_404(item_id)
     if item.user_id != get_jwt_identity():
         return jsonify({"message": "Unauthorized"}), 403
-    db.session.delete(item)
-    db.session.commit()
-    return jsonify({"message": "Item deleted successfully"}), 200
+
+    try:
+        # Delete all associated favorites and feedbacks
+        Favorites.query.filter_by(item_id=item_id).delete()
+        UserFeedback.query.filter_by(item_id=item_id).delete()
+
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({"message": "Item deleted successfully"}), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"Database error during deletion: {e}")
+        return jsonify({"message": "Failed to delete item", "error": str(e)}), 500
 
 @app.route('/items/<int:item_id>', methods=['PATCH'])
 @jwt_required()
@@ -167,23 +197,34 @@ def patch_item(item_id):
         return jsonify({"message": "Unauthorized"}), 403
 
     data = request.get_json()
+    print("Received PATCH data:", data)
 
-    if 'name' in data:
-        item.name = data['name']
-    if 'description' in data:
-        item.description = data['description']
-    if 'location' in data:
-        item.location = data['location']
-    if 'condition' in data:
-        item.condition = data['condition']
-    if 'time_to_be_set_on_curb' in data:
-        try:
+    try:
+        if 'name' in data:
+            item.name = data['name']
+        if 'description' in data:
+            item.description = data['description']
+        if 'location' in data:
+            item.location = data['location']
+        if 'condition' in data:
+            item.condition = data['condition']
+        if 'time_to_be_set_on_curb' in data and data['time_to_be_set_on_curb']:
             item.time_to_be_set_on_curb = datetime.strptime(data['time_to_be_set_on_curb'], '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            return jsonify({"message": "Invalid date format. Please use 'YYYY-MM-DD HH:MM:SS' format."}), 400
 
-    db.session.commit()
-    return jsonify({"message": "Item updated successfully", "item": item.to_dict()}), 200
+        db.session.commit()
+        return jsonify({"message": "Item updated successfully", "item": item.to_dict()}), 200
+
+    except ValueError as ve:
+        print(f"Value error: {ve}")
+        return jsonify({"message": "Invalid date format. Please use YYYY-MM-DD HH:MM:SS.", "error": str(ve)}), 400
+    except SQLAlchemyError as sae:
+        db.session.rollback()
+        print(f"Database error: {sae}")
+        return jsonify({"message": "Database error", "error": str(sae)}), 500
+    except Exception as e:
+        db.session.rollback()
+        print(f"Unexpected error: {e}")
+        return jsonify({"message": "An unexpected error occurred", "error": str(e)}), 500
 
 @app.route('/favorites', methods=['GET'])
 @jwt_required()
@@ -197,8 +238,16 @@ def get_favorites():
 @jwt_required()
 def add_to_favorites(item_id):
     user_id = get_jwt_identity()
+    # Check if the item exists
+    item = Item.query.get(item_id)
+    if not item:
+        return jsonify({"message": "Item not found"}), 404
+
+    # Check if the item is already in favorites
     if Favorites.query.filter_by(user_id=user_id, item_id=item_id).first():
         return jsonify({"message": "Item already in favorites"}), 409
+    
+    # If the item exists and is not in favorites, add it
     favorite = Favorites(user_id=user_id, item_id=item_id)
     db.session.add(favorite)
     db.session.commit()
@@ -211,9 +260,11 @@ def remove_from_favorites(item_id):
     favorite = Favorites.query.filter_by(user_id=user_id, item_id=item_id).first()
     if not favorite:
         return jsonify({"message": "Item not found in favorites"}), 404
+    
     db.session.delete(favorite)
     db.session.commit()
     return jsonify({"message": "Item removed from favorites"}), 200
+
 
 @app.route('/feedback', methods=['POST'])
 @jwt_required()
