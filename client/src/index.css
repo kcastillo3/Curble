@@ -537,6 +537,18 @@ body {
   box-shadow: none;
 }
 
+.interaction-group {
+  display: flex;
+  flex-direction: column; /* Stack vertically */
+  align-items: center; /* Center align items */
+  gap: 10px; /* Space between elements */
+}
+
+.feedback-group {
+  display: flex;
+  gap: 10px; /* Space between Like and Dislike buttons */
+}
+
 
 /* Modal backdrop */
 .modal {

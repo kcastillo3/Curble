@@ -10,26 +10,37 @@ const Browse = () => {
   useEffect(() => {
     const fetchItemsAndFavorites = async () => {
       setIsLoading(true);
+      const savedFavorites = JSON.parse(localStorage.getItem('favoritedItems')) || [];
+
       try {
         const itemsResponse = await axios.get('/items');
         setItems(itemsResponse.data);
-
+  
         const token = localStorage.getItem('access_token');
         if (token) {
           const favoritesResponse = await axios.get('/favorites', {
             headers: { Authorization: `Bearer ${token}` },
           });
-          setFavoritedItems(favoritesResponse.data.map(item => item.item_id)); // Check favorites endpoint returns items with 'item_id'
+          const favoritesIds = favoritesResponse.data.map(f => f.item_id);
+          const combinedFavorites = Array.from(new Set([...savedFavorites, ...favoritesIds]));
+          setFavoritedItems(combinedFavorites);
+        } else {
+          setFavoritedItems(savedFavorites);
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching favorites:', error);
+        setFavoritedItems(savedFavorites);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchItemsAndFavorites();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('favoritedItems', JSON.stringify(favoritedItems));
+  }, [favoritedItems]);
 
 const handleLike = async (itemId) => {
   try {
@@ -75,30 +86,33 @@ const handleDislike = async (itemId) => {
   }
 };
 
-  const handleToggleFavorite = async (itemId) => {
-    const isFavorited = favoritedItems.includes(itemId);
-    const endpoint = isFavorited ? `/favorites/${itemId}` : `/favorites`;
-    const method = isFavorited ? 'delete' : 'post';
-    const config = {
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-    };
-    const data = isFavorited ? {} : { item_id: itemId };
-
-    try {
-      const response = isFavorited ? 
-        await axios.delete(endpoint, config) : 
-        await axios.post(endpoint, data, config);
-
-      if (response.status === 200 || response.status === 201) {
-        setFavoritedItems(current => 
-          isFavorited ? 
-          current.filter(id => id !== itemId) : 
-          [...current, itemId]);
-      }
-    } catch (error) {
-      console.error(isFavorited ? 'Error removing from favorites' : 'Error adding to favorites', error);
-    }
+const handleToggleFavorite = async (itemId) => {
+  const isFavorited = favoritedItems.includes(itemId);
+  const endpoint = isFavorited ? `/favorites/${itemId}` : `/favorites`;
+  const config = {
+    headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
   };
+  const data = isFavorited ? {} : { item_id: itemId };
+
+  try {
+    const response = isFavorited
+      ? await axios.delete(endpoint, config)
+      : await axios.post(endpoint, data, config);
+
+    if (response.status === 200 || response.status === 201) {
+      const updatedFavorites = isFavorited
+        ? favoritedItems.filter(id => id !== itemId)
+        : [...favoritedItems, itemId];
+      
+      setFavoritedItems(updatedFavorites);
+
+      // Update localStorage
+      localStorage.setItem('favoritedItems', JSON.stringify(updatedFavorites));
+    }
+  } catch (error) {
+    console.error(isFavorited ? 'Error removing from favorites' : 'Error adding to favorites', error);
+  }
+};
 
   if (isLoading) {
     return <div>Loading...</div>;

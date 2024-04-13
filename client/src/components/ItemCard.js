@@ -49,30 +49,33 @@ const ItemCard = ({
         <h3>{item.name}</h3>
         <img src={imagePath} alt={item.name} className="item-image" onClick={toggleModal} />
         <p>{item.description}</p>
-        <div className="button-group">
-          {canEdit && (
-            <button onClick={(e) => { e.stopPropagation(); onEdit(item); }}>Edit</button>
-          )}
-          {canDelete && (
-            <button onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}>Delete</button>
-          )}
-          {typeof isFavorited !== 'undefined' && (
+        <div className="interaction-group">
+          <div className="feedback-group"> {/* Group for Like and Dislike buttons */}
+            {onLike && (
+              <button onClick={(e) => { e.stopPropagation(); handleLike(); }}>
+                Like ({likes})
+              </button>
+            )}
+            {onDislike && (
+              <button onClick={(e) => { e.stopPropagation(); handleDislike(); }}>
+                Dislike ({dislikes})
+              </button>
+            )}
+          </div>
+          {typeof isFavorited !== 'undefined' && ( /* Favorite button on its own line */
             <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(item.id); }}>
               {favoriteButtonText}
             </button>
           )}
-          {onLike && (
-            <button onClick={(e) => { e.stopPropagation(); handleLike(); }}>
-              Like ({likes})
-            </button>
-          )}
-          {onDislike && (
-            <button onClick={(e) => { e.stopPropagation(); handleDislike(); }}>
-              Dislike ({dislikes})
-            </button>
-          )}
         </div>
+        {canEdit && (
+          <button onClick={(e) => { e.stopPropagation(); onEdit(item); }}>Edit</button>
+        )}
+        {canDelete && (
+          <button onClick={(e) => { e.stopPropagation(); onDelete(item.id); }}>Delete</button>
+        )}
       </div>
+
 
       {isModalOpen && (
         <div className="modal" onClick={() => setIsModalOpen(false)}>
