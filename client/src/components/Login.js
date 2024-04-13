@@ -21,10 +21,13 @@ const Login = () => {
   const handleLogin = async (values, { setSubmitting }) => {
     try {
       await login(values);
-      // Since login() updates localStorage, retrieve the token from there
       const token = localStorage.getItem('access_token');
-      console.log('JWT Token:', token); // Log the token to the console
-      history.push('/successful-message'); // Adjust as necessary
+      if (token) {
+        console.log('JWT Token:', token); // Log the token to the console
+        history.push('/successful-message'); // Adjust as necessary
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
     } catch (error) {
       console.error('Login error:', error.response?.data.message || error.message);
       alert('Login failed. Please check your credentials.');

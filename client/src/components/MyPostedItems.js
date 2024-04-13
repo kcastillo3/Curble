@@ -64,14 +64,24 @@ const MyPostedItems = ({ userId }) => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // Use space and include seconds
 };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'time_to_be_set_on_curb') {
-        const formattedDate = formatDateForBackend(value);
-        setEditingItem(prev => ({ ...prev, [name]: formattedDate }));
-    } else {
-        setEditingItem(prev => ({ ...prev, [name]: value }));
-    }
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === 'time_to_be_set_on_curb') {
+    const formattedDate = formatDateForBackend(value);
+    setEditingItem(prev => ({ ...prev, [name]: formattedDate }));
+  } else if (name === 'address' || name === 'borough') {
+    // Ensure both borough and address are updated correctly
+    setEditingItem(prev => ({
+      ...prev,
+      [name]: value,  // Directly update the name with the value
+      location: name === 'address'
+        ? `${prev.borough || ''}, ${value}`
+        : `${value}, ${prev.address || ''}`
+    }));
+  } else {
+    setEditingItem(prev => ({ ...prev, [name]: value }));
+  }
 };
 
   const handleDelete = async (itemId) => {
@@ -135,10 +145,18 @@ const MyPostedItems = ({ userId }) => {
   };
 
   const startEditing = (item) => {
-    setEditingItem(item);
+    // Assume location is in the format "Borough, Address"
+    const locationParts = item.location ? item.location.split(', ') : ['', ''];
+    const [borough, address] = locationParts.length > 1 ? locationParts : [item.location, ''];
+
+    setEditingItem({
+        ...item,
+        borough, // Set borough separately
+        address  // Set address separately
+    });
     setImagePreview(item.image || ''); // Use the existing image as a fallback
     setIsImageUpdated(false); // Reset image updated state
-  };
+};
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -148,6 +166,7 @@ const MyPostedItems = ({ userId }) => {
       <h2>My Posted Items</h2>
       {editingItem && (
         <form onSubmit={handleUpdate} className="edit-item-form">
+
           {/* Name */}
           <div className="form-group">
             <label htmlFor="name" className="name-label">Name:</label>
@@ -159,6 +178,7 @@ const MyPostedItems = ({ userId }) => {
               placeholder="Enter the item name"
             />
           </div>
+
           {/* Description Input */}
           <div className="form-group">
             <label htmlFor="description">Description:</label>
@@ -170,35 +190,36 @@ const MyPostedItems = ({ userId }) => {
               className="form-control"
             />
           </div>
+
           {/* Borough Selection */}
           <div className="form-group">
-            <label htmlFor="borough">Borough:</label>
-            <select
-              name="borough"
-              value={editingItem.borough || ''}
-              onChange={handleChange}
-              className="form-control"
-            >
-              <option value="">Select Borough</option>
-              <option value="Manhattan">Manhattan</option>
-              <option value="Brooklyn">Brooklyn</option>
-              <option value="Queens">Queens</option>
-              <option value="Bronx">Bronx</option>
-              <option value="Staten Island">Staten Island</option>
-            </select>
+              <label htmlFor="borough">Borough:</label>
+              <select
+                  name="borough"
+                  value={editingItem.borough || ''}
+                  onChange={handleChange}
+                  className="form-control"
+              >
+                  <option value="">Select Borough</option>
+                  <option value="Manhattan">Manhattan</option>
+                  <option value="Brooklyn">Brooklyn</option>
+                  <option value="Queens">Queens</option>
+                  <option value="Bronx">Bronx</option>
+                  <option value="Staten Island">Staten Island</option>
+              </select>
           </div>
   
           {/* Address Input */}
           <div className="form-group">
-            <label htmlFor="address">Address:</label>
-            <input
-              name="address"
-              type="text"
-              placeholder="Address (e.g., 123 Main St)"
-              value={editingItem.address || ''}
-              onChange={handleChange}
-              className="form-control"
-            />
+              <label htmlFor="address">Address:</label>
+              <input
+                  name="address"
+                  type="text"
+                  placeholder="Address (e.g., 123 Main St)"
+                  value={editingItem.address || ''}
+                  onChange={handleChange}
+                  className="form-control"
+              />
           </div>
   
           {/* Condition Dropdown */}
@@ -230,6 +251,7 @@ const MyPostedItems = ({ userId }) => {
               className="form-control"
             />
           </div>
+
           {/* Dropzone for image upload */}
           <div className="form-group">
             <div {...getRootProps({ className: 'dropzone' })}>
@@ -244,6 +266,7 @@ const MyPostedItems = ({ userId }) => {
           <button type="button" onClick={() => setEditingItem(null)} className="cancel-button">Cancel</button>
         </form>
       )}
+      
       <div className="browse-items-container">
         {items.length > 0 ? (
           items.map(item => (
