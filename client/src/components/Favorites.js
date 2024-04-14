@@ -39,7 +39,9 @@ const Favorites = () => {
       await axios.delete(`/favorites/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFavoriteItems(favoriteItems.filter(item => item.id !== itemId));
+      const newFavorites = favoriteItems.filter(item => item.id !== itemId);
+      setFavoriteItems(newFavorites);
+      localStorage.setItem('favoritedItems', JSON.stringify(newFavorites.map(item => item.id)));
     } catch (error) {
       console.error('Error removing from favorites:', error);
     }

@@ -1,31 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import couchImage from '../assets/couch-Photoroom.png-Photoroom.png';
 import nycCouchImage from '../assets/nyc couch.png';
 import earthImage from '../assets/Earth.png';
 
 const About = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,  // Animation duration
+      once: true,  // Whether animation should only happen once
+      delay: 50,  // Delay
+      easing: 'ease-in-out',  // Easing function
+    });
+  }, []);
+
   return (
     <div className="about-container">
-      <section className="story-section">
+      <section className="story-section" data-aos="fade-up">
         <h2>Our Story</h2>
         <p>Born from the simple idea that one person's discard could be another's treasure, 'Curble' was created to facilitate these exchanges with ease and safety. What started as a small initiative has grown into a vibrant community of sharers in NYC, environmental advocates, and individuals passionate about making a difference, one curb at a time.</p>
-        <img src={couchImage} alt="Comfortable Couch" />
-        </section>
+        <img src={couchImage} alt="Comfortable Couch" data-aos="fade-right"/>
+      </section>
       
-      <section className="mission-section">
+      <section className="mission-section" data-aos="fade-left">
         <h2>Our Mission</h2>
-        <img src={nycCouchImage} alt="Couch in NYC" />
+        <img src={nycCouchImage} alt="Couch in NYC" data-aos="zoom-in"/>
         <p>At 'Curble', we believe in the power of community and the significant impact of sharing. Our platform is more than just a marketplace; it's a movement towards sustainability, reducing waste, and strengthening neighborhood bonds.</p>
         <p>By connecting individuals to give and get items for free, we're not only decluttering homes but also ensuring that usable goods find new life elsewhere, rather than in landfills.</p>
       </section>
       
-      <section className="vision-section">
+      <section className="vision-section" data-aos="fade-up">
         <h2>Our Vision</h2>
-        <img src={earthImage} alt="Earth" />
+        <img src={earthImage} alt="Earth" data-aos="fade-down"/>
         <p>We envision a world where sharing becomes second nature, where communities are closely knit through acts of generosity, and sustainability is ingrained in every action we take. 'Curble' is more than a platform; it's a pledge to foster a greener, more connected world.</p>
       </section>
       
-      <section className="why-section">
+      <section className="why-section" data-aos="fade-up">
         <h2>Why 'Curble'?</h2>
         <ul>
           <li><strong>Community Focused:</strong> Our heart is in building strong, supportive communities where sharing is a way of life.</li>

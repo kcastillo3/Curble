@@ -38,9 +38,21 @@ const Browse = () => {
     fetchItemsAndFavorites();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('favoritedItems', JSON.stringify(favoritedItems));
-  }, [favoritedItems]);
+useEffect(() => {
+  const loadFavoritesFromStorage = () => {
+    const savedFavorites = JSON.parse(localStorage.getItem('favoritedItems')) || [];
+    setFavoritedItems(savedFavorites);
+  };
+
+  loadFavoritesFromStorage();
+
+  // Optional: Setup an event listener for local storage changes if multiple tabs are a concern
+  window.addEventListener('storage', loadFavoritesFromStorage);
+
+  return () => {
+    window.removeEventListener('storage', loadFavoritesFromStorage);
+  };
+}, []);
 
 const handleLike = async (itemId) => {
   try {
