@@ -56,9 +56,9 @@ const Favorites = () => {
   }
 
   return (
-    <div className="browse-container"> {/* Use the same container class for consistent styling */}
+    <div className="browse-container">
       <h2>My Favorites</h2>
-      <div className="browse-items-container"> {/* Apply the 4x4 grid layout */}
+      <div className={`favorites-items-container ${favoriteItems.length === 0 ? 'center-content' : ''}`}>
         {favoriteItems.length > 0 ? (
           favoriteItems.map(item => (
             <ItemCard 
@@ -66,15 +66,14 @@ const Favorites = () => {
               item={item}
               isFavorited={true}
               onToggleFavorite={() => handleUnfavorite(item.id)}
-              // I may want to include or exclude other actions like editing or deleting
             />
           ))
         ) : (
-          <p>You have not added any items to your favorites yet.</p>
+          <p className="no-favorites-message">You have not added any items to your favorites yet.</p>
         )}
       </div>
     </div>
   );
-};
+}
 
 export default Favorites;

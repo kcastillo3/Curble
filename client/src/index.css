@@ -466,7 +466,6 @@ body {
 }
 
 /* Item Card */
-
 .item-card {
   border: 1px solid #ececec;
   border-radius: 10px;
@@ -1022,4 +1021,24 @@ you can specifically target the logout button container like so: */
   max-width: 100px; /* Limit to actual image size */
   max-height: 100px; /* Limit to actual image size */
   margin: 0 auto; /* Center the image */
+}
+
+/* Favorites */
+.favorites-items-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Creates a 4-column layout */
+  grid-gap: 20px; /* Adjust the space between cards */
+  padding: 20px; /* Padding around the whole grid */
+}
+
+.center-content {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center; /* Centers vertically */
+  min-height: 200px; /* Provides a minimum height for the container */
+}
+
+.no-favorites-message {
+  text-align: center;
+  width: 100%; /* To ensure the text centers within the container */
 }

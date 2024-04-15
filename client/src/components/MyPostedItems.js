@@ -31,7 +31,7 @@ const MyPostedItems = ({ userId }) => {
     const fetchItems = async () => {
       try {
         const token = localStorage.getItem('access_token');
-        const response = await axios.get('/items', {
+        const response = await axios.get('/items?posted_by_user=true', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setItems(response.data);

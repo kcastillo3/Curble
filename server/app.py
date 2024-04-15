@@ -72,7 +72,7 @@ def items():
             condition=data['condition'],
             user_id=user_id,
             time_to_be_set_on_curb=time_to_be_set_on_curb,
-            image=filename  # Store only the filename here
+            image=filename
         )
         db.session.add(new_item)
         db.session.commit()
@@ -80,7 +80,15 @@ def items():
 
     else:
         user_id = get_jwt_identity()
-        items = Item.query.all()
+        posted_by_user = request.args.get('posted_by_user', 'false').lower() == 'true'
+        
+        if posted_by_user and user_id:
+            # Fetch only items posted by the logged-in user
+            items = Item.query.filter_by(user_id=user_id).all()
+        else:
+            # Fetch all items
+            items = Item.query.all()
+        
         items_data = []
         for item in items:
             item_dict = item.to_dict()
