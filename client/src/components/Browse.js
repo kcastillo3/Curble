@@ -6,6 +6,7 @@ const Browse = () => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [favoritedItems, setFavoritedItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchItemsAndFavorites = async () => {
@@ -28,8 +29,7 @@ const Browse = () => {
           setFavoritedItems(savedFavorites);
         }
       } catch (error) {
-        console.error('Error fetching favorites:', error);
-        setFavoritedItems(savedFavorites);
+        console.error('Error fetching items:', error);
       } finally {
         setIsLoading(false);
       }
@@ -37,6 +37,11 @@ const Browse = () => {
   
     fetchItemsAndFavorites();
   }, []);
+
+  const filteredItems = items.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
 useEffect(() => {
   const loadFavoritesFromStorage = () => {
@@ -133,11 +138,18 @@ const handleToggleFavorite = async (itemId) => {
   return (
     <div className="browse-container">
       <h2>Browse Items</h2>
+      <input
+        type="text"
+        placeholder="Search items..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="search-bar"
+      />
       <div className="browse-items-container"> {/* This div should have the grid styling */}
         {isLoading ? (
           <div>Loading...</div>
-        ) : items.length > 0 ? (
-          items.map((item) => (
+        ) : filteredItems.length > 0 ? (
+          filteredItems.map((item) => (
             <ItemCard
               key={item.id}
               item={item}

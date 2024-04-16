@@ -465,6 +465,28 @@ body {
   padding: 5px 0; /* Padding to ensure the text doesn't touch any borders */
 }
 
+.search-bar {
+  display: block; /* Required for margins to work */
+  margin: 20px auto; /* Top and bottom margin of 20px, left and right margins auto */
+  padding: 10px 20px;
+  width: calc(100% - 100px); /* Adjust the width as needed, 100px accounts for padding */
+  max-width: 600px; /* Maximum width of the search bar */
+  border: 2px solid #94EBCB; /* Border color */
+  border-radius: 25px; /* Rounded corners */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  font-size: 1rem; /* Font size */
+  background-color: #fff; /* Background color */
+  color: #333; /* Text color */
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); /* Box shadow for depth */
+}
+
+.search-bar:focus {
+  outline: none; /* Removes the default outline */
+  border-color: #94EBCB; /* Set to your preferred color */
+  box-shadow: 0 0 0 2px rgba(148, 235, 203, 0.5); /* Optional: Adds a glow effect */
+}
+
+
 /* Item Card */
 .item-card {
   border: 1px solid #ececec;
